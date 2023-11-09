@@ -105,7 +105,8 @@ def main(parser_data):
 
     category_index = {v: k for k, v in class_dict.items()}
 
-    VOC_root = parser_data.data_path
+    #VOC_root = parser_data.data_path
+    VOC_root = '/home/xdeng/PycharmProjects/deep-learning-for-image-processing-xd/pytorch_object_detection/faster_rcnn'
     # check voc root
     if os.path.exists(os.path.join(VOC_root, "VOCdevkit")) is False:
         raise FileNotFoundError("VOCdevkit dose not in path:'{}'.".format(VOC_root))
@@ -130,7 +131,10 @@ def main(parser_data):
     model = FasterRCNN(backbone=backbone, num_classes=parser_data.num_classes + 1)
 
     # 载入你自己训练好的模型权重
-    weights_path = parser_data.weights_path
+    #weights_path = parser_data.weights_path
+    weights_path = '/home/xdeng/PycharmProjects/deep-learning-for-image-processing-xd/pytorch_object_detection/faster_rcnn/save_weights/resNetFpn-model-14.pth'
+
+
     assert os.path.exists(weights_path), "not found {} file.".format(weights_path)
     weights_dict = torch.load(weights_path, map_location='cpu')
     weights_dict = weights_dict["model"] if "model" in weights_dict else weights_dict
