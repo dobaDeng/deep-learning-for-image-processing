@@ -20,7 +20,7 @@ from train_utils import get_coco_api_from_dataset, CocoEvaluator
 def summarize(self, catId=None):
     """
     Compute and display summary metrics for evaluation results.
-    Note this functin can *only* be applied on the default parameter setting
+    Note this functiOn can *only* be applied on the default parameter setting
     """
 
     def _summarize(ap=1, iouThr=None, areaRng='all', maxDets=100):

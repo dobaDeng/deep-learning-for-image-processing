@@ -4,9 +4,4 @@ Using [0, 0.5, 0.6299605249474366, 0.7937005259840997, 1.0, 1.2599210498948732, 
 Count of instances per bin: [   5   25  929  117  260 4198  135   48]
 Using 6 dataloader workers
 _IncompatibleKeys(missing_keys=[], unexpected_keys=['fc.weight', 'fc.bias'])
-Epoch: [0]  [  0/714]  eta: 2:35:16.703094  lr: 0.000024  loss: 4.0686 (4.0686)  loss_classifier: 2.9806 (2.9806)  loss_box_reg: 0.2106 (0.2106)  loss_objectness: 0.8296 (0.8296)  loss_rpn_box_reg: 0.0478 (0.0478)  time: 13.0486  data: 1.3902  max mem: 12136
-Epoch: [0]  [ 50/714]  eta: 0:10:12.565459  lr: 0.000725  loss: 1.2336 (1.5049)  loss_classifier: 0.6083 (1.0425)  loss_box_reg: 0.4670 (0.2441)  loss_objectness: 0.1289 (0.1856)  loss_rpn_box_reg: 0.0294 (0.0327)  time: 0.6743  data: 0.0003  max mem: 13639
-Epoch: [0]  [100/714]  eta: 0:08:11.594099  lr: 0.001425  loss: 0.4186 (1.0773)  loss_classifier: 0.1858 (0.6831)  loss_box_reg: 0.2021 (0.2550)  loss_objectness: 0.0144 (0.1098)  loss_rpn_box_reg: 0.0162 (0.0293)  time: 0.6738  data: 0.0003  max mem: 13639
-Epoch: [0]  [150/714]  eta: 0:07:08.799115  lr: 0.002126  loss: 0.5641 (0.9223)  loss_classifier: 0.2643 (0.5482)  loss_box_reg: 0.2565 (0.2615)  loss_objectness: 0.0266 (0.0837)  loss_rpn_box_reg: 0.0167 (0.0288)  time: 0.6791  data: 0.0003  max mem: 13639
-Epoch: [0]  [200/714]  eta: 0:06:21.504551  lr: 0.002826  loss: 0.3725 (0.8317)  loss_classifier: 0.1654 (0.4722)  loss_box_reg: 0.1791 (0.2637)  loss_objectness: 0.0082 (0.0682)  loss_rpn_box_reg: 0.0198 (0.0276)  time: 0.6881  data: 0.0003  max mem: 13639
-Epoch: [0]  [250/714]  eta: 0:05:38.298042  lr: 0.003527  loss: 0.3543 (0.7667)  loss_classifier: 0.1193 (0.4185)  loss_box_reg: 0.1871 (0.2619)  loss_objectness: 0.0206 (0.0593)  loss_rpn_box_reg: 0.0273 (0.0269)  time: 0.6774  data: 0.0003  max mem: 13639
+Epoch: [0]  [  0/714]  eta: 2:34:04.732208  lr: 0.000024  loss: 4.2438 (4.2438)  loss_classifier: 3.3561 (3.3561)  loss_box_reg: 0.2317 (0.2317)  loss_objectness: 0.6212 (0.6212)  loss_rpn_box_reg: 0.0348 (0.0348)  time: 12.9478  data: 0.9719  max mem: 12136
