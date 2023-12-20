@@ -57,12 +57,12 @@ def main(args):
     VOC_root = '/home/xdeng/PycharmProjects/deep-learning-for-image-processing-xd/pytorch_object_detection/faster_rcnn'
 
     # check voc root
-    if os.path.exists(os.path.join(VOC_root)) is False:
+    if os.path.exists(os.path.join(VOC_root, "VOCdevkit")) is False:
         raise FileNotFoundError("VOCdevkit dose not in path:'{}'.".format(VOC_root))
 
     # load train data set
     # VOCdevkit -> VOC2012 -> ImageSets -> Main -> train.txt
-    train_dataset = VOCDataSet(VOC_root, '2012', data_transform["train"], "train.txt")
+    train_dataset = VOCDataSet(VOC_root, "2012", data_transform["train"], "train.txt")
     train_sampler = None
 
     # 是否按图片相似高宽比采样图片组成batch
@@ -96,13 +96,14 @@ def main(args):
     # load validation data set
     # VOCdevkit -> VOC2012 -> ImageSets -> Main -> val.txt
     val_dataset = VOCDataSet(VOC_root, "2012", data_transform["val"], "val.txt")
-
     val_data_set_loader = torch.utils.data.DataLoader(val_dataset,
                                                       batch_size=1,
                                                       shuffle=False,
                                                       pin_memory=True,
                                                       num_workers=nw,
                                                       collate_fn=val_dataset.collate_fn)
+
+
 
 
 
@@ -153,13 +154,17 @@ def main(args):
         # update the learning rate
         lr_scheduler.step()
 
+        # 在验证集上评估
+        average_val_loss, coco_info = utils.evaluate(model, val_data_set_loader, device=device)
+
         # evaluate on the test dataset
         coco_info = utils.evaluate(model, val_data_set_loader, device=device)
 
         # write into txt
+        # 将结果写入文件
         with open(results_file, "a") as f:
-            # 写入的数据包括coco指标还有loss和learning rate
-            result_info = [f"{i:.4f}" for i in coco_info + [mean_loss.item()]] + [f"{lr:.6f}"]
+            # 写入包括COCO指标、训练和验证损失以及学习率
+            result_info = [f"{i:.4f}" for i in coco_info + [mean_loss.item(), average_val_loss]] + [f"{lr:.6f}"]
             txt = "epoch:{} {}".format(epoch, '  '.join(result_info))
             f.write(txt + "\n")
 

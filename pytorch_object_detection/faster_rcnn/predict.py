@@ -61,7 +61,8 @@ def main():
     model.to(device)
 
     # read class_indict
-    label_json_path = './pascal_voc_classes.json'
+    # label_json_path = './pascal_voc_classes.json'
+    label_json_path = './FC_classes.json'
     assert os.path.exists(label_json_path), "json file {} dose not exist.".format(label_json_path)
     with open(label_json_path, 'r') as f:
         class_dict = json.load(f)

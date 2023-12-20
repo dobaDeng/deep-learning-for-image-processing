@@ -7,21 +7,21 @@ from PIL import Image
 from lxml import etree
 
 
-class VOCDataSet(Dataset):
-    """读取解析PASCAL VOC2007/2012数据集"""
+class FCDataSet(Dataset):
+    """读取解析PASCAL FC2007/2012数据集"""
 
-    def __init__(self, voc_root, year="2012", transforms=None, txt_name: str = "train.txt"):
-        assert year in ["2007", "2012"], "year must be in ['2007', '2012']"
+    def __init__(self, fc_root, transforms=None, txt_name: str = "train.txt"): #, year="2012"
+        #assert year in ["2007", "2012"], "year must be in ['2007', '2012']"
         # 增加容错能力
-        if "VOCdevkit" in voc_root:
-            self.root = os.path.join(voc_root, f"VOC{year}")
+        if "FC" in fc_root:
+            self.root = os.path.join(fc_root, )
         else:
-            self.root = os.path.join(voc_root, "VOCdevkit", f"VOC{year}")
-        self.img_root = os.path.join(self.root, "JPEGImages")
-        self.annotations_root = os.path.join(self.root, "Annotations")
+            self.root = os.path.join(fc_root, "FC")
+        self.img_root = os.path.join(self.root, "images")
+        self.annotations_root = os.path.join(self.root, "annotations")
 
         # read train.txt or val.txt file
-        txt_path = os.path.join(self.root, "ImageSets", "Main", txt_name)
+        txt_path = os.path.join(self.root, "Main", txt_name)
         assert os.path.exists(txt_path), "not found {} file.".format(txt_name)
 
         with open(txt_path) as read:
@@ -49,7 +49,7 @@ class VOCDataSet(Dataset):
         assert len(self.xml_list) > 0, "in '{}' file does not find any information.".format(txt_path)
 
         # read class_indict
-        json_file = './pascal_voc_classes.json'
+        json_file = './FC_classes.json'
         assert os.path.exists(json_file), "{} file not exist.".format(json_file)
         with open(json_file, 'r') as f:
             self.class_dict = json.load(f)
@@ -68,8 +68,8 @@ class VOCDataSet(Dataset):
         data = self.parse_xml_to_dict(xml)["annotation"]
         img_path = os.path.join(self.img_root, data["filename"])
         image = Image.open(img_path)
-        if image.format != "JPEG":
-            raise ValueError("Image '{}' format not JPEG".format(img_path))
+        # if image.format != "JPEG":
+        #     raise ValueError("Image '{}' format not JPEG".format(img_path))
 
         boxes = []
         labels = []
@@ -85,7 +85,7 @@ class VOCDataSet(Dataset):
             if xmax <= xmin or ymax <= ymin:
                 print("Warning: in '{}' xml, there are some bbox w/h <=0".format(xml_path))
                 continue
-            
+
             boxes.append([xmin, ymin, xmax, ymax])
             labels.append(self.class_dict[obj["name"]])
             if "difficult" in obj:
@@ -210,7 +210,7 @@ class VOCDataSet(Dataset):
 # # read class_indict
 # category_index = {}
 # try:
-#     json_file = open('./pascal_voc_classes.json', 'r')
+#     json_file = open('./FC_classes.json', 'r')
 #     class_dict = json.load(json_file)
 #     category_index = {str(v): str(k) for k, v in class_dict.items()}
 # except Exception as e:
@@ -224,7 +224,7 @@ class VOCDataSet(Dataset):
 # }
 #
 # # load train data set
-# train_data_set = VOCDataSet(os.getcwd(), "2012", data_transform["train"], "train.txt")
+# train_data_set = FCDataSet(os.getcwd(), "2012", data_transform["train"], "train.txt")
 # print(len(train_data_set))
 # for index in random.sample(range(0, len(train_data_set)), k=5):
 #     img, target = train_data_set[index]
