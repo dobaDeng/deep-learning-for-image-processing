@@ -53,7 +53,7 @@ def main():
 
     # load train weights
     #weights_path = "./save_weights/model.pth"
-    weights_path = '/home/xdeng/PycharmProjects/deep-learning-for-image-processing-xd/pytorch_object_detection/faster_rcnn/save_weights/resNetFpn-model-14.pth'
+    weights_path = '/pytorch_object_detection/faster_rcnn/save_weights/resNetFpn-model-14_bppfb.pth'
     assert os.path.exists(weights_path), "{} file dose not exist.".format(weights_path)
     weights_dict = torch.load(weights_path, map_location='cpu')
     weights_dict = weights_dict["model"] if "model" in weights_dict else weights_dict

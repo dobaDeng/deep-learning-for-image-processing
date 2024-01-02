@@ -39,6 +39,7 @@ class VOCDataSet(Dataset):
             with open(xml_path) as fid:
                 xml_str = fid.read()
             xml = etree.fromstring(xml_str)
+
             data = self.parse_xml_to_dict(xml)["annotation"]
             if "object" not in data:
                 print(f"INFO: no objects in {xml_path}, skip this annotation file.")
