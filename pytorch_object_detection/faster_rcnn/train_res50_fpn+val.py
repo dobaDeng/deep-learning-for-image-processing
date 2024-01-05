@@ -2,13 +2,12 @@ import os
 import datetime
 
 import torch
-
 import transforms
-from network_files import FasterRCNN, FastRCNNPredictor
+from network_files import FasterRCNN, FastRCNNPredictor #in faster_rcnn_framework.py
 from backbone import resnet50_fpn_backbone
 from my_dataset import VOCDataSet
 from train_utils import GroupedBatchSampler, create_aspect_ratio_groups
-from train_utils import train_eval_utils as utils
+from train_utils import train_eval_utils_val as utils
 
 
 def create_model(num_classes, load_pretrain_weights=True):
@@ -105,8 +104,6 @@ def main(args):
 
 
 
-
-
     # create model num_classes equal background + 20 classes
     model = create_model(num_classes=args.num_classes + 1)
     # print(model)
@@ -139,6 +136,7 @@ def main(args):
         print("the training process from epoch{}...".format(args.start_epoch))
 
     train_loss = []
+    val_losses = []
     learning_rate = []
     val_map = []
 
@@ -154,23 +152,22 @@ def main(args):
         # update the learning rate
         lr_scheduler.step()
 
-        # 在验证集上评估
-        average_val_loss, coco_info = utils.evaluate(model, val_data_set_loader, device=device)
-
         # evaluate on the test dataset
         coco_info = utils.evaluate(model, val_data_set_loader, device=device)
 
-        # write into txt
-        # 将结果写入文件
+        # 计算验证集上的损失
+        val_loss = utils.validate_one_epoch(model, val_data_set_loader, device=device)
+        val_losses.append(val_loss.item())  # 保存验证损失
+
+
         with open(results_file, "a") as f:
-            # 写入包括COCO指标、训练和验证损失以及学习率
-            result_info = [f"{i:.4f}" for i in coco_info + [mean_loss.item(), average_val_loss]] + [f"{lr:.6f}"]
+            result_info = [f"{i:.4f}" for i in coco_info + [mean_loss.item(), val_loss.item()]] + [f"{lr:.6f}"]
             txt = "epoch:{} {}".format(epoch, '  '.join(result_info))
             f.write(txt + "\n")
 
         val_map.append(coco_info[1])  # pascal mAP
 
-        # save weights
+        # 保存模型权重
         save_files = {
             'model': model.state_dict(),
             'optimizer': optimizer.state_dict(),
@@ -180,15 +177,24 @@ def main(args):
             save_files["scaler"] = scaler.state_dict()
         torch.save(save_files, "./save_weights/resNetFpn-model-{}.pth".format(epoch))
 
-    # plot loss and lr curve
-    if len(train_loss) != 0 and len(learning_rate) != 0:
-        from plot_curve import plot_loss_and_lr
-        plot_loss_and_lr(train_loss, learning_rate)
 
-    # plot mAP curve
-    if len(val_map) != 0:
-        from plot_curve import plot_map
-        plot_map(val_map)
+        # 绘制损失和学习率曲线
+        if len(train_loss) != 0 and len(learning_rate) != 0:
+            from plot_curve import plot_loss_and_lr
+
+            plot_loss_and_lr(train_loss, learning_rate)
+
+        # 绘制mAP曲线
+        if len(val_map) != 0:
+            from plot_curve import plot_map
+
+            plot_map(val_map)
+
+        # 绘制验证损失曲线
+        if len(val_losses) != 0:
+         from plot_curve import plot_loss_curve
+
+         plot_loss_curve(val_losses, title="Validation Loss")
 
 
 if __name__ == "__main__":
@@ -210,8 +216,8 @@ if __name__ == "__main__":
     # 指定接着从哪个epoch数开始训练
     parser.add_argument('--start_epoch', default=0, type=int, help='start epoch')
     # 训练的总epoch数
-    parser.add_argument('--epochs', default=15, type=int, metavar='N',
-                        help='number of total epochs to run')
+    parser.add_argument('--epochs', default=3, type=int, metavar='N',
+                        help='number of total epochs to run')  #default=15
     # 学习率
     parser.add_argument('--lr', default=0.01, type=float,
                         help='initial learning rate, 0.02 is the default value for training '

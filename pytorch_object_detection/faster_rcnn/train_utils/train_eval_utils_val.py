@@ -31,6 +31,8 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch,
         # 混合精度训练上下文管理器，如果在CPU环境中不起任何作用
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             loss_dict = model(images, targets)
+            #print(type(loss_dict), 'losss dict type')  # 打印返回值的类型
+            #print(loss_dict, 'loss dict')  # 打印返回值的内容
             losses = sum(loss for loss in loss_dict.values())
 
         # reduce losses over all GPUs for logging purpose
@@ -65,7 +67,23 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch,
     return mloss, now_lr
 
 
-@torch.no_grad()
+def validate_one_epoch(model, data_loader, device):
+    model.eval()
+    val_loss = 0.0
+    with torch.no_grad():
+        for images, targets in data_loader:
+            images = list(img.to(device) for img in images)
+            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+
+            loss_list = model(images, targets)  # 假设这返回一个损失列表
+            batch_loss = sum(loss.item() for loss in loss_list)  # 计算批次的总损失
+            val_loss += batch_loss
+
+    return val_loss / len(data_loader)  # 返回平均损失
+
+
+    return val_loss / len(data_loader)
+
 def evaluate(model, data_loader, device):
 
     cpu_device = torch.device("cpu")
@@ -77,12 +95,8 @@ def evaluate(model, data_loader, device):
     iou_types = _get_iou_types(model)
     coco_evaluator = CocoEvaluator(coco, iou_types)
 
-    val_loss = 0
-    num_batches = 0
-
     for image, targets in metric_logger.log_every(data_loader, 100, header):
         image = list(img.to(device) for img in image)
-        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
         # 当使用CPU时，跳过GPU相关指令
         if device != torch.device("cpu"):
@@ -90,9 +104,6 @@ def evaluate(model, data_loader, device):
 
         model_time = time.time()
         outputs = model(image)
-        loss_dict = {k: v.to(cpu_device) for k, v in outputs.items() if 'loss' in k}
-        losses = sum(loss for loss in loss_dict.values())
-
 
         outputs = [{k: v.to(cpu_device) for k, v in t.items()} for t in outputs]
         model_time = time.time() - model_time
@@ -103,9 +114,6 @@ def evaluate(model, data_loader, device):
         coco_evaluator.update(res)
         evaluator_time = time.time() - evaluator_time
         metric_logger.update(model_time=model_time, evaluator_time=evaluator_time)
-
-        # 计算平均验证集损失
-        average_val_loss = val_loss / num_batches
 
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()
@@ -118,7 +126,7 @@ def evaluate(model, data_loader, device):
 
     coco_info = coco_evaluator.coco_eval[iou_types[0]].stats.tolist()  # numpy to list
 
-    return average_val_loss,coco_info
+    return coco_info
 
 
 def _get_iou_types(model):

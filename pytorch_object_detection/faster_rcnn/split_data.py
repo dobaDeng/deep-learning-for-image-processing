@@ -8,7 +8,7 @@ def main():
     files_path = "./VOCdevkit/VOC2012/Annotations"
     assert os.path.exists(files_path), "path: '{}' does not exist.".format(files_path)
 
-    val_rate = 0.5
+    val_rate = 0.3
 
     files_name = sorted([file.split(".")[0] for file in os.listdir(files_path)])
     files_num = len(files_name)
