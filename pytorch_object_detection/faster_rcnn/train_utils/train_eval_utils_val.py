@@ -75,14 +75,20 @@ def validate_one_epoch(model, data_loader, device):
             images = list(img.to(device) for img in images)
             targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-            loss_list = model(images, targets)  # 假设这返回一个损失列表
-            batch_loss = sum(loss.item() for loss in loss_list)  # 计算批次的总损失
+            losses = model(images, targets)  # 获取损失
+
+            # 检查损失是字典还是列表，并据此计算总损失
+            if isinstance(losses, dict):
+                batch_loss = sum(loss.item() for loss in losses.values())
+            elif isinstance(losses, list):
+                batch_loss = sum(loss.item() for loss in losses)
+            else:
+                raise TypeError("损失的返回类型既不是字典也不是列表")
+
             val_loss += batch_loss
 
     return val_loss / len(data_loader)  # 返回平均损失
 
-
-    return val_loss / len(data_loader)
 
 def evaluate(model, data_loader, device):
 
