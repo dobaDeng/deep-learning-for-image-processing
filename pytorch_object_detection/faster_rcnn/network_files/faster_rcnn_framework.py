@@ -37,10 +37,10 @@ class FasterRCNNBase(nn.Module):
     @torch.jit.unused
     def eager_outputs(self, losses, detections):
         # type: (Dict[str, Tensor], List[Dict[str, Tensor]]) -> Union[Dict[str, Tensor], List[Dict[str, Tensor]]]
-        if self.training:
-            return losses
+        #if self.training:
+        #    return losses
 
-        return detections
+        return (losses, detections)
 
     def forward(self, images, targets=None):
         # type: (List[Tensor], Optional[List[Dict[str, Tensor]]]) -> Tuple[Dict[str, Tensor], List[Dict[str, Tensor]]]
@@ -102,13 +102,14 @@ class FasterRCNNBase(nn.Module):
         losses = {}
         losses.update(detector_losses)
         losses.update(proposal_losses)
-
+        #print(losses)
         if torch.jit.is_scripting():
             if not self._has_warned:
                 warnings.warn("RCNN always returns a (Losses, Detections) tuple in scripting")
                 self._has_warned = True
             return losses, detections
         else:
+            #print(losses)
             return self.eager_outputs(losses, detections)
 
         # if self.training:

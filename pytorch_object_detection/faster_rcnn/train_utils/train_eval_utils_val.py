@@ -31,8 +31,6 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch,
         # 混合精度训练上下文管理器，如果在CPU环境中不起任何作用
         with torch.cuda.amp.autocast(enabled=scaler is not None):
             loss_dict = model(images, targets)
-            #print(type(loss_dict), 'losss dict type')  # 打印返回值的类型
-            #print(loss_dict, 'loss dict')  # 打印返回值的内容
             losses = sum(loss for loss in loss_dict.values())
 
         # reduce losses over all GPUs for logging purpose
@@ -67,27 +65,29 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch,
     return mloss, now_lr
 
 
-def validate_one_epoch(model, data_loader, device):
-    model.eval()
-    val_loss = 0.0
-    with torch.no_grad():
-        for images, targets in data_loader:
-            images = list(img.to(device) for img in images)
-            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-
-            losses = model(images, targets)  # 获取损失
-
-            # 检查损失是字典还是列表，并据此计算总损失
-            if isinstance(losses, dict):
-                batch_loss = sum(loss.item() for loss in losses.values())
-            elif isinstance(losses, list):
-                batch_loss = sum(loss.item() for loss in losses)
-            else:
-                raise TypeError("损失的返回类型既不是字典也不是列表")
-
-            val_loss += batch_loss
-
-    return val_loss / len(data_loader)  # 返回平均损失
+# def validate_one_epoch(model, data_loader, device):
+#     model.eval()
+#     val_loss = 0.0
+#     with torch.no_grad():
+#         for images, targets in data_loader:
+#             images = list(img.to(device) for img in images)
+#             targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+#
+#             #print("targets in validation", targets)
+#             detections, losses = model(images, targets)  # 获取损失
+#             print("type", type(losses))
+#             print("val losses", losses)
+#             # 检查损失是字典还是列表，并据此计算总损失
+#             if isinstance(losses, dict):
+#                 batch_loss = sum(loss.item() for loss in losses.values())
+#             elif isinstance(losses, list):
+#                 batch_loss = sum(loss.item() for loss in losses)
+#             else:
+#                 raise TypeError("损失的返回类型既不是字典也不是列表")
+#
+#             val_loss += batch_loss
+#     print("val loss", val_loss)
+#     return val_loss / len(data_loader)  # 返回平均损失
 
 
 def evaluate(model, data_loader, device):
@@ -109,7 +109,7 @@ def evaluate(model, data_loader, device):
             torch.cuda.synchronize(device)
 
         model_time = time.time()
-        outputs = model(image)
+        outputs, x = model(image)
 
         outputs = [{k: v.to(cpu_device) for k, v in t.items()} for t in outputs]
         model_time = time.time() - model_time

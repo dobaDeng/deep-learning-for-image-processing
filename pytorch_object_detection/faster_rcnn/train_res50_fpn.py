@@ -151,7 +151,7 @@ def main(args):
         learning_rate.append(lr)
 
         # update the learning rate
-        lr_scheduler.step()
+        #lr_scheduler.step()
 
         # evaluate on the test dataset
         coco_info = utils.evaluate(model, val_data_set_loader, device=device)
